@@ -15,17 +15,17 @@ services:
       - $HOME/docker/volumes/postgres:/var/lib/postgresql/pgdata-dev
       
 
- node-service:
+ auth-service:
     restart: always
     build:
-      context: '../node-service'
+      context: '../auth-service'
       dockerfile: 'Dockerfile'
     ports:
       - 3001:3000
     env_file:
       - ../node-service/env/local.env
     volumes:
-      - ../node-service:/app     
+      - ../auth-service:/app     
     depends_on:
       - kafka
       - db
