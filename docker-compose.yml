@@ -4,7 +4,6 @@ services:
     image: postgres
     restart: always
     ports:
-      # - "5432:2345"
       - "2345:5432" 
     environment:
       PGDATA: /var/lib/postgresql/pgdata-dev
@@ -23,7 +22,7 @@ services:
     ports:
       - 3001:3000
     env_file:
-      - ../node-service/env/local.env
+      - ../auth-service/env/local.env
     volumes:
       - ../auth-service:/app     
     depends_on:
@@ -37,8 +36,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     volumes:
-     - zookeeper-data:/var/lib/zookeeper/data
-     - zookeeper-log:/var/lib/zookeeper/log
+      - ./zookeeper-data:/var/lib/zookeeper/data
+      - ./zookeeper-log:/var/lib/zookeeper/log
 
  kafka:
     restart: always
@@ -62,5 +61,15 @@ services:
       CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
       KAFKA_ADVERTISED_HOST_NAME: kafka
     volumes:
-     - kafka-data:/var/lib/kafka/data
+      - ./kafka-data:/var/lib/kafka/data
     command: ["bash", "-c", "rm -rf /var/lib/kafka/data/meta.properties"]
+
+ ngnix:
+    image: nginx
+    volumes:
+     - ./templates:/etc/nginx/templates
+    ports:
+     - "8080:80"
+    environment:
+    - NGINX_HOST=localhost
+    - NGINX_PORT=80
