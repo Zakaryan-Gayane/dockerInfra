@@ -2,9 +2,11 @@ version: '3.4'
 services:  
  db:
     image: postgres
+    container_name: postgreSQL
     restart: always
     ports:
-      - "2345:5432" 
+      # - "2345:5432" 
+      - "5432:2345" 
     environment:
       PGDATA: /var/lib/postgresql/pgdata-dev
       POSTGRES_USER: postgres
@@ -12,15 +14,29 @@ services:
       POSTGRES_DB: devdb
     volumes:
       - $HOME/docker/volumes/postgres:/var/lib/postgresql/pgdata-dev
-      
+
+ mongodb:
+    image: mongo
+    container_name: mongoDB
+    environment:
+     MONGO_INITDB_ROOT_USERNAME: root
+     MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+     - 27017:27017 
+    volumes:
+     - /home/barry/mongodb/database:/data/db
+
+
 
  auth-service:
+    image: auth-service
+    container_name: Auth-Service
     restart: always
     build:
       context: '../auth-service'
       dockerfile: 'Dockerfile'
     ports:
-      - 3001:3000
+      - 3003:3000
     env_file:
       - ../auth-service/env/local.env
     volumes:
@@ -29,7 +45,31 @@ services:
       - kafka
       - db
 
+
+ data-api:
+    image: data-api
+    container_name: Data-api
+    restart: always
+    build:
+      context: '../data-api'
+      dockerfile: 'Dockerfile'
+    # environment:
+    #   - MONGODB_URL=mongodb://127.0.0.1:27017/data
+    ports:
+      - 4000:3000
+    env_file:
+      - ../data-api/env/local.env
+    volumes:
+      - ../data-api:/app     
+    depends_on:
+      - kafka
+      - mongodb
+      
+
+
+
  zookeeper:
+    container_name: zookeeper
     restart: always
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -40,6 +80,7 @@ services:
       - ./zookeeper-log:/var/lib/zookeeper/log
 
  kafka:
+    container_name: kafka
     restart: always
     image: confluentinc/cp-kafka:latest
     labels:
