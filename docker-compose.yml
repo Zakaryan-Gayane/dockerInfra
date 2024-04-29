@@ -15,16 +15,6 @@ services:
     volumes:
       - $HOME/docker/volumes/postgres:/var/lib/postgresql/pgdata-dev
 
-#  mongodb:
-#     image: mongo
-#     container_name: mongoDB
-#     environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-#     ports:
-#      - 27017:27017 
-#     volumes:
-#      - /home/barry/mongodb/database:/data/db
 
 
 
@@ -43,41 +33,25 @@ services:
       - ../auth-service:/app     
     depends_on:
       - kafka
-      # - mongodb
       - db
 
-#  data-api:
-#     image: data-api
-#     container_name: Data-api
+      
+#  php:
+#     image: php-app
+#     container_name: PHP-App
 #     restart: always
 #     build:
-#       context: '../data-api'
+#       context: '../php-app'
 #       dockerfile: 'Dockerfile'
-#     # environment:
-#     #   - MONGODB_URL=mongodb://127.0.0.1:27017/data
 #     ports:
-#       - 4000:3000
-#     env_file:
-#       - ../data-api/env/local.env
+#       - "8080:80"
+#     # env_file:
+#     #   - ../data-api/env/local.env
 #     volumes:
-#       - ../data-api:/app     
+#       # - "../php-app:/var/www/html"
+#       - './php-app:/doc/src'
 #     depends_on:
-#       - kafka
-#       - mongodb
-      
- php:
-    image: php-app
-    container_name: PHP-App
-    restart: always
-    build:
-      context: '../php-app'
-      dockerfile: 'Dockerfile'
-    ports:
-      - "8080:80"
-    volumes:
-      - "../php-app:/var/www/html"
-    depends_on:
-      - db
+#       - db
 
 
  zookeeper:
@@ -116,13 +90,3 @@ services:
     volumes:
       - ./kafka-data:/var/lib/kafka/data
     command: ["bash", "-c", "rm -rf /var/lib/kafka/data/meta.properties"]
-
- ngnix:
-    image: nginx
-    volumes:
-     - ./templates:/etc/nginx/templates
-    ports:
-     - "8080:80"
-    environment:
-    - NGINX_HOST=localhost
-    - NGINX_PORT=80
